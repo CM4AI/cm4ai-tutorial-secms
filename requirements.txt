@@ -1,0 +1,7 @@
+cellmaps_pipeline
+jupyterlab
+pyDataverse
+tqdm
+seaborn
+umap-learn
+tensorflow
