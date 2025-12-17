@@ -15,12 +15,42 @@ def clean_input_labels(df_raw):
     return df_raw
 
 
+def get_formatted_df(
+        df,
+        cell_line,
+        category,
+        uniprot_col="UniProtIds",
+        cell_col="cell_line",
+        cat_col="category",
+        exp_col="expnum",
+        biosep_prefix="biosep_"):
+    biosep_cols = [c for c in df.columns if c.startswith(biosep_prefix)]
+
+    d = df.loc[
+        (df[cell_col] == cell_line) & (df[cat_col] == category),
+        [uniprot_col, cell_col, cat_col, exp_col, *biosep_cols],
+    ].copy()
+
+    # ensure numeric for averaging
+    d.fillna(0, inplace=True)
+    d[biosep_cols] = d[biosep_cols].apply(pd.to_numeric, errors="coerce")
+    
+    # average across expnums (rows) per UniProtId
+    out = (
+        d.groupby(uniprot_col, as_index=False)[biosep_cols]
+         .mean()
+    )
+
+    return out
+
+
 def get_disambiguated_dfs(df):
     # Remove rows with ambiguous gene/protein identification
     ambig_mask = (
             df["Genes"].str.contains(";", na=False) |
             df["ProteinAccessions"].str.contains(";", na=False) |
-            df["ProteinNames"].str.contains(";", na=False)  
+            df["ProteinNames"].str.contains(";", na=False) |
+            df["UniProtIds"].str.contains(";", na=False)
         )
 
     secms_data_clean = df.loc[~ambig_mask]
