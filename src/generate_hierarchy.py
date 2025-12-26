@@ -1,5 +1,4 @@
 import os
-import pandas as pd 
 
 from cellmaps_utils.provenance import ProvenanceUtil
 from cellmaps_generate_hierarchy.ppi import CosineSimilarityPPIGenerator
